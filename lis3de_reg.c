@@ -241,12 +241,9 @@ int32_t lis3de_adc_raw_get(const stmdev_ctx_t *ctx, int16_t *val)
 
   if (ret != 0) { return ret; }
 
-  val[0] = (int16_t)buff[1];
-  val[0] = (val[0] * 256) + (int16_t)buff[0];
-  val[1] = (int16_t)buff[3];
-  val[1] = (val[1] * 256) + (int16_t)buff[2];
-  val[2] = (int16_t)buff[5];
-  val[2] = (val[2] * 256) + (int16_t)buff[4];
+  val[0] = (int16_t)(buff[0] | ((uint16_t)buff[1] << 8));
+  val[1] = (int16_t)(buff[2] | ((uint16_t)buff[3] << 8));
+  val[2] = (int16_t)(buff[4] | ((uint16_t)buff[5] << 8));
 
   return ret;
 }
@@ -343,7 +340,7 @@ int32_t lis3de_operating_mode_set(const stmdev_ctx_t *ctx,
 
   if (ret == 0)
   {
-    ctrl_reg1.lpen = (uint8_t) val;
+    ctrl_reg1.lpen = (uint8_t) val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG1, (uint8_t *)&ctrl_reg1, 1);
   }
 
@@ -399,7 +396,7 @@ int32_t lis3de_data_rate_set(const stmdev_ctx_t *ctx, lis3de_odr_t val)
 
   if (ret == 0)
   {
-    ctrl_reg1.odr = (uint8_t)val;
+    ctrl_reg1.odr = (uint8_t)val & 0x0FU;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG1, (uint8_t *)&ctrl_reg1, 1);
   }
 
@@ -492,7 +489,7 @@ int32_t lis3de_high_pass_on_outputs_set(const stmdev_ctx_t *ctx,
 
   if (ret == 0)
   {
-    ctrl_reg2.fds = val;
+    ctrl_reg2.fds = val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG2, (uint8_t *)&ctrl_reg2, 1);
   }
 
@@ -547,7 +544,7 @@ int32_t lis3de_high_pass_bandwidth_set(const stmdev_ctx_t *ctx,
 
   if (ret == 0)
   {
-    ctrl_reg2.hpcf = (uint8_t)val;
+    ctrl_reg2.hpcf = (uint8_t)val & 0x03U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG2, (uint8_t *)&ctrl_reg2, 1);
   }
 
@@ -621,7 +618,7 @@ int32_t lis3de_high_pass_mode_set(const stmdev_ctx_t *ctx, lis3de_hpm_t val)
 
   if (ret == 0)
   {
-    ctrl_reg2.hpm = (uint8_t)val;
+    ctrl_reg2.hpm = (uint8_t)val & 0x03U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG2, (uint8_t *)&ctrl_reg2, 1);
   }
 
@@ -689,7 +686,7 @@ int32_t lis3de_full_scale_set(const stmdev_ctx_t *ctx, lis3de_fs_t val)
 
   if (ret == 0)
   {
-    ctrl_reg4.fs = (uint8_t)val;
+    ctrl_reg4.fs = (uint8_t)val & 0x03U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG4, (uint8_t *)&ctrl_reg4, 1);
   }
 
@@ -756,7 +753,7 @@ int32_t lis3de_block_data_update_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    ctrl_reg4.bdu = val;
+    ctrl_reg4.bdu = val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG4, (uint8_t *)&ctrl_reg4, 1);
   }
 
@@ -938,7 +935,7 @@ int32_t lis3de_self_test_set(const stmdev_ctx_t *ctx, lis3de_st_t val)
 
   if (ret == 0)
   {
-    ctrl_reg4.st = (uint8_t)val;
+    ctrl_reg4.st = (uint8_t)val & 0x03U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG4, (uint8_t *)&ctrl_reg4, 1);
   }
 
@@ -1001,7 +998,7 @@ int32_t lis3de_boot_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    ctrl_reg5.boot = val;
+    ctrl_reg5.boot = val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG5, (uint8_t *)&ctrl_reg5, 1);
   }
 
@@ -1131,7 +1128,7 @@ int32_t lis3de_int1_gen_threshold_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    int1_ths.ths = val;
+    int1_ths.ths = val & 0x7FU;
     ret = lis3de_write_reg(ctx, LIS3DE_IG1_THS, (uint8_t *)&int1_ths, 1);
   }
 
@@ -1181,7 +1178,7 @@ int32_t lis3de_int1_gen_duration_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    int1_duration.d = val;
+    int1_duration.d = val & 0x7FU;
     ret = lis3de_write_reg(ctx, LIS3DE_IG1_DURATION,
                            (uint8_t *)&int1_duration, 1);
   }
@@ -1297,7 +1294,7 @@ int32_t lis3de_int2_gen_threshold_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    int2_ths.ths = val;
+    int2_ths.ths = val & 0x7FU;
     ret = lis3de_write_reg(ctx, LIS3DE_IG2_THS, (uint8_t *)&int2_ths, 1);
   }
 
@@ -1347,7 +1344,7 @@ int32_t lis3de_int2_gen_duration_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    int2_duration.d = val;
+    int2_duration.d = val & 0x7FU;
     ret = lis3de_write_reg(ctx, LIS3DE_IG2_DURATION,
                            (uint8_t *)&int2_duration, 1);
   }
@@ -1409,7 +1406,7 @@ int32_t lis3de_high_pass_int_conf_set(const stmdev_ctx_t *ctx,
 
   if (ret == 0)
   {
-    ctrl_reg2.hp = (uint8_t)val;
+    ctrl_reg2.hp = (uint8_t)val & 0x07U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG2, (uint8_t *)&ctrl_reg2, 1);
   }
 
@@ -1530,7 +1527,7 @@ int32_t lis3de_int2_pin_detect_4d_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    ctrl_reg5.d4d_ig2 = val;
+    ctrl_reg5.d4d_ig2 = val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG5, (uint8_t *)&ctrl_reg5, 1);
   }
 
@@ -1580,7 +1577,7 @@ int32_t lis3de_int2_pin_notification_mode_set(const stmdev_ctx_t *ctx,
 
   if (ret == 0)
   {
-    ctrl_reg5.lir_ig2 = (uint8_t)val;
+    ctrl_reg5.lir_ig2 = (uint8_t)val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG5, (uint8_t *)&ctrl_reg5, 1);
   }
 
@@ -1643,7 +1640,7 @@ int32_t lis3de_int1_pin_detect_4d_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    ctrl_reg5.d4d_ig1 = val;
+    ctrl_reg5.d4d_ig1 = val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG5, (uint8_t *)&ctrl_reg5, 1);
   }
 
@@ -1692,7 +1689,7 @@ int32_t lis3de_int1_pin_notification_mode_set(const stmdev_ctx_t *ctx,
 
   if (ret == 0)
   {
-    ctrl_reg5.lir_ig1 = (uint8_t)val;
+    ctrl_reg5.lir_ig1 = (uint8_t)val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG5, (uint8_t *)&ctrl_reg5, 1);
   }
 
@@ -1800,7 +1797,7 @@ int32_t lis3de_fifo_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    ctrl_reg5.fifo_en = val;
+    ctrl_reg5.fifo_en = val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG5, (uint8_t *)&ctrl_reg5, 1);
   }
 
@@ -1847,7 +1844,7 @@ int32_t lis3de_fifo_watermark_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    fifo_ctrl_reg.fth = val;
+    fifo_ctrl_reg.fth = val & 0x1FU;
     ret = lis3de_write_reg(ctx, LIS3DE_FIFO_CTRL_REG,
                            (uint8_t *)&fifo_ctrl_reg, 1);
   }
@@ -1897,7 +1894,7 @@ int32_t lis3de_fifo_trigger_event_set(const stmdev_ctx_t *ctx,
 
   if (ret == 0)
   {
-    fifo_ctrl_reg.tr = (uint8_t)val;
+    fifo_ctrl_reg.tr = (uint8_t)val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_FIFO_CTRL_REG,
                            (uint8_t *)&fifo_ctrl_reg, 1);
   }
@@ -1960,7 +1957,7 @@ int32_t lis3de_fifo_mode_set(const stmdev_ctx_t *ctx, lis3de_fm_t val)
 
   if (ret == 0)
   {
-    fifo_ctrl_reg.fm = (uint8_t)val;
+    fifo_ctrl_reg.fm = (uint8_t)val & 0x03U;
     ret = lis3de_write_reg(ctx, LIS3DE_FIFO_CTRL_REG,
                            (uint8_t *)&fifo_ctrl_reg, 1);
   }
@@ -2200,7 +2197,7 @@ int32_t lis3de_tap_threshold_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    click_ths.ths = val;
+    click_ths.ths = val & 0x7FU;
     ret = lis3de_write_reg(ctx, LIS3DE_CLICK_THS, (uint8_t *)&click_ths, 1);
   }
 
@@ -2251,7 +2248,7 @@ int32_t lis3de_tap_notification_mode_set(const stmdev_ctx_t *ctx,
 
   if (ret == 0)
   {
-    click_ths.lir = (uint8_t)val;
+    click_ths.lir = (uint8_t)val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CLICK_THS, (uint8_t *)&click_ths, 1);
   }
 
@@ -2316,7 +2313,7 @@ int32_t lis3de_shock_dur_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    time_limit.tli = val;
+    time_limit.tli = val & 0x7FU;
     ret = lis3de_write_reg(ctx, LIS3DE_TIME_LIMIT, (uint8_t *)&time_limit, 1);
   }
 
@@ -2489,7 +2486,7 @@ int32_t lis3de_act_threshold_set(const stmdev_ctx_t *ctx, uint8_t val)
 
   if (ret == 0)
   {
-    act_ths.acth = val;
+    act_ths.acth = val & 0x7FU;
     ret = lis3de_write_reg(ctx, LIS3DE_ACT_THS, (uint8_t *)&act_ths, 1);
   }
 
@@ -2598,7 +2595,7 @@ int32_t lis3de_spi_mode_set(const stmdev_ctx_t *ctx, lis3de_sim_t val)
 
   if (ret == 0)
   {
-    ctrl_reg4.sim = (uint8_t)val;
+    ctrl_reg4.sim = (uint8_t)val & 0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_CTRL_REG4, (uint8_t *)&ctrl_reg4, 1);
   }
 
